@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat</title>
+</head>
+<body>
+    <h1>Chat</h1>
+    <div id="messages">
+        {% for message in messages %}
+            {% if not message.deleted_by_sender or not message.deleted_by_receiver %}
+                <p>{{ message.content }}</p>
+                {% for file in message.files.all %}
+                    <a href="{{ file.file.url }}">{{ file.file.name }}</a><br>
+                {% endfor %}
+                {% if message.sender == request.user %}
+                    <form action="{% url 'delete_message' message.id %}" method="post">
+                        {% csrf_token %}
+                        <button type="submit">Delete</button>
+                    </form>
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+    </div>
+    <form action="{% url 'send_message' %}" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="hidden" name="receiver_id" value="{{ receiver_id }}">
+        <textarea name="content" rows="3" cols="50"></textarea><br>
+        <input type="file" name="file"><br>
+        <button type="submit">Send</button>
+    </form>
+</body>
+</html>
